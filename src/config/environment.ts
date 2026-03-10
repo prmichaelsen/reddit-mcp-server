@@ -1,0 +1,20 @@
+export const env = {
+  PORT: process.env.PORT || '8080',
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  PLATFORM_URL: process.env.PLATFORM_URL || '',
+  PLATFORM_SERVICE_TOKEN: process.env.PLATFORM_SERVICE_TOKEN || '',
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '',
+  JWT_ISSUER: process.env.JWT_ISSUER || 'agentbase.me',
+  JWT_AUDIENCE: process.env.JWT_AUDIENCE || 'mcp-server',
+};
+
+export function validateConfig(): void {
+  const required = ['PLATFORM_URL', 'CORS_ORIGIN', 'PLATFORM_SERVICE_TOKEN'] as const;
+
+  for (const key of required) {
+    if (!env[key]) {
+      console.error(`Error: ${key} environment variable is required`);
+      process.exit(1);
+    }
+  }
+}

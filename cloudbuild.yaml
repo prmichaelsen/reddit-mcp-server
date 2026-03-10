@@ -1,0 +1,47 @@
+steps:
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/reddit-mcp-server:$SHORT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/reddit-mcp-server:latest'
+      - '-f'
+      - 'Dockerfile.production'
+      - '.'
+
+  # Push Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/reddit-mcp-server:$SHORT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/reddit-mcp-server:latest'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'reddit-mcp-server'
+      - '--image=gcr.io/$PROJECT_ID/reddit-mcp-server:$SHORT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--min-instances=0'
+      - '--max-instances=10'
+      - '--memory=512Mi'
+      - '--cpu=1'
+      - '--timeout=60s'
+      - '--update-secrets=PLATFORM_SERVICE_TOKEN=reddit-mcp-server-platform-token:latest'
+
+images:
+  - 'gcr.io/$PROJECT_ID/reddit-mcp-server:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/reddit-mcp-server:latest'
+
+options:
+  machineType: 'N1_HIGHCPU_8'

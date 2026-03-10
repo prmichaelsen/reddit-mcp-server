@@ -1,22 +1,99 @@
 # reddit-mcp-server
 
-MCP server wrapping the Reddit API for AI agents, mcp-auth enabled
+MCP server wrapping the Reddit API for AI agents, mcp-auth enabled.
 
-> Built with [Agent Context Protocol](https://github.com/prmichaelsen/agent-context-protocol)
+This MCP server uses [@prmichaelsen/mcp-auth](https://github.com/prmichaelsen/mcp-auth) for authentication and multi-tenancy.
 
-## Quick Start
+## Server Configuration
 
-[Add installation and usage instructions here]
+- **Type**: Dynamic (Per-User Credentials)
+- **Auth Provider**: JWT
+- **Platform**: agentbase.me
 
-## Features
+## Installation
 
-- Multi-tenant Reddit API access via mcp-auth
-- JWT authentication with per-user token resolution
-- Cloud Run deployment via `npm run deploy`
+```bash
+npm install
+```
 
 ## Development
 
-This project uses the Agent Context Protocol for development:
+```bash
+# Copy environment config
+cp .env.example .env
+# Edit .env with your values
+
+# Run in development mode with auto-reload
+npm run dev
+
+# Build for production
+npm run build
+
+# Run tests
+npm test
+
+# Type check
+npm run type-check
+```
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and configure:
+
+- `PLATFORM_URL`: Platform URL (default: https://agentbase.me)
+- `PLATFORM_SERVICE_TOKEN`: Shared secret for JWT verification and platform auth
+- `CORS_ORIGIN`: CORS origin (default: https://agentbase.me)
+
+## Deployment
+
+### Docker
+
+```bash
+docker build -f Dockerfile.production -t reddit-mcp-server .
+docker run -p 8080:8080 --env-file .env reddit-mcp-server
+```
+
+### Google Cloud Run
+
+```bash
+# Upload secrets
+tsx scripts/upload-secrets.ts
+
+# Deploy via Cloud Build
+gcloud builds submit --config cloudbuild.yaml
+```
+
+## Project Structure
+
+```
+reddit-mcp-server/
+├── src/
+│   ├── index.ts              # Main entry point with wrapServer
+│   ├── auth/
+│   │   ├── provider.ts       # JWT auth provider
+│   │   └── token-resolver.ts # Per-user Reddit credential fetching
+│   ├── config/
+│   │   └── environment.ts    # Environment configuration
+│   └── types/
+│       └── index.ts          # Type definitions
+├── scripts/
+│   ├── upload-secrets.ts     # Upload secrets to GCP
+│   └── test-auth.ts          # Test JWT generation/validation
+├── package.json
+├── tsconfig.json
+├── jest.config.js
+├── esbuild.build.js
+├── esbuild.watch.js
+├── Dockerfile.production
+├── Dockerfile.development
+├── cloudbuild.yaml
+├── .env.example
+└── README.md
+```
+
+## ACP Development
+
+This project uses the Agent Context Protocol:
 
 - `@acp.init` - Initialize agent context
 - `@acp.plan` - Plan milestones and tasks
@@ -24,30 +101,6 @@ This project uses the Agent Context Protocol for development:
 - `@acp.status` - Check project status
 
 See [AGENT.md](./AGENT.md) for complete ACP documentation.
-
-## Project Structure
-
-```
-reddit-mcp-server/
-├── AGENT.md              # ACP methodology
-├── agent/                # ACP directory
-│   ├── design/          # Design documents
-│   ├── milestones/      # Project milestones
-│   ├── tasks/           # Task breakdown
-│   ├── patterns/        # Architectural patterns
-│   └── progress.yaml    # Progress tracking
-├── src/                 # Source code
-│   ├── index.ts         # Server entry point
-│   ├── auth/            # JWT auth provider & token resolver
-│   └── config/          # Environment configuration
-└── Dockerfile.production # Production Docker build
-```
-
-## Getting Started
-
-1. Initialize context: `@acp.init`
-2. Plan your project: `@acp.plan`
-3. Start building: `@acp.proceed`
 
 ## License
 
