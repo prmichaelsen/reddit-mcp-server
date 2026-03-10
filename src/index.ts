@@ -17,8 +17,8 @@ const tokenResolver = new PlatformTokenResolver(authProvider);
 
 // Wrap server with authentication
 const wrappedServer = wrapServer({
-  serverFactory: async (accessToken: string, userId: string) => {
-    return await createServer(accessToken, userId);
+  serverFactory: (accessToken: string) => {
+    return createServer(accessToken).server;
   },
   authProvider,
   tokenResolver,
